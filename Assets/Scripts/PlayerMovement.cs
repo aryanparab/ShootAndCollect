@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -8,30 +9,39 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        if (Keyboard.current == null)
+            return;
+
         float move = 0f;
         float turn = 0f;
 
-        if (Input.GetKey(KeyCode.W))
+        if (Keyboard.current.wKey.isPressed)
             move = 1f;
 
-        if (Input.GetKey(KeyCode.S))
+        if (Keyboard.current.sKey.isPressed)
             move = -1f;
 
-        if (Input.GetKey(KeyCode.A))
+        if (Keyboard.current.aKey.isPressed)
             turn = -1f;
 
-        if (Input.GetKey(KeyCode.D))
+        if (Keyboard.current.dKey.isPressed)
             turn = 1f;
 
-        float speed = move >= 0 ? moveSpeed : backwardSpeed;
+        float currentSpeed =
+            move >= 0 ? moveSpeed : backwardSpeed;
 
         transform.Translate(
-            Vector3.forward * move * speed * Time.deltaTime
+            Vector3.forward *
+            move *
+            currentSpeed *
+            Time.deltaTime
         );
 
         transform.Rotate(
             Vector3.up,
-            turn * turnSpeed * Time.deltaTime
+            turn *
+            turnSpeed *
+            Time.deltaTime
         );
     }
 }
