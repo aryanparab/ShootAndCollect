@@ -7,41 +7,71 @@ public class PlayerMovement : MonoBehaviour
     public float backwardSpeed = 4f;
     public float turnSpeed = 140f;
 
+    private Rigidbody rb;
+
+    private float moveInput;
+    private float turnInput;
+
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+    }
+
     void Update()
     {
         if (Keyboard.current == null)
             return;
 
-        float move = 0f;
-        float turn = 0f;
+        moveInput = 0f;
+        turnInput = 0f;
 
         if (Keyboard.current.wKey.isPressed)
-            move = 1f;
+            moveInput = 1f;
 
         if (Keyboard.current.sKey.isPressed)
-            move = -1f;
+            moveInput = -1f;
 
         if (Keyboard.current.aKey.isPressed)
-            turn = -1f;
+            turnInput = -1f;
 
         if (Keyboard.current.dKey.isPressed)
-            turn = 1f;
+            turnInput = 1f;
+    }
+
+    void FixedUpdate()
+    {
+        // Prevent collision physics from spinning the player
+        rb.angularVelocity = Vector3.zero;
 
         float currentSpeed =
-            move >= 0 ? moveSpeed : backwardSpeed;
+            moveInput >= 0f
+            ? moveSpeed
+            : backwardSpeed;
 
-        transform.Translate(
-            Vector3.forward *
-            move *
+        Vector3 movement =
+            transform.forward *
+            moveInput *
             currentSpeed *
-            Time.deltaTime
+            Time.fixedDeltaTime;
+
+        rb.MovePosition(
+            rb.position + movement
         );
 
-        transform.Rotate(
-            Vector3.up,
-            turn *
+        float rotationAmount =
+            turnInput *
             turnSpeed *
-            Time.deltaTime
+            Time.fixedDeltaTime;
+
+        Quaternion rotation =
+            Quaternion.Euler(
+                0f,
+                rotationAmount,
+                0f
+            );
+
+        rb.MoveRotation(
+            rb.rotation * rotation
         );
     }
 }

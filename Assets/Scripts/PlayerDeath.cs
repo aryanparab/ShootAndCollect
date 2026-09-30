@@ -1,15 +1,22 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class PlayerDeath : MonoBehaviour
 {
-    void OnCollisionEnter(Collision collision)
+    private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        PlayerStealth stealth =
+            collision.gameObject.GetComponent<PlayerStealth>();
+
+        if (stealth == null)
+            return;
+
+        // Hidden players are safe from monster contact
+        if (stealth.IsHidden)
         {
-            SceneManager.LoadScene(
-                SceneManager.GetActiveScene().buildIndex
-            );
+            Debug.Log("Monster touched hidden player - no death");
+            return;
         }
+
+        GameManager.Instance.GameOver();
     }
 }

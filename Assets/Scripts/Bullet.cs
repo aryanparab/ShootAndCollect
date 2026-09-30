@@ -2,72 +2,75 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    public float speed = 14f;
+    public float speed = 10f;
     public int damage = 1;
-    public float stunDuration = 0.4f;
 
     private Rigidbody rb;
-    private bool hasLanded = false;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
+
+        rb.useGravity = false;
+        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
     }
 
     public void Fire(Vector3 direction)
     {
-        hasLanded = false;
-
-        rb.useGravity = false;
         rb.linearVelocity = direction.normalized * speed;
+    }
+
+    void FixedUpdate()
+    {
+        // Keep projectile moving forever at constant speed
+        if (rb.linearVelocity.sqrMagnitude > 0.01f)
+        {
+            rb.linearVelocity =
+                rb.linearVelocity.normalized * speed;
+        }
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        if (hasLanded)
-            return;
-
-        // Ignore the player that fired the bullet
-        if (collision.gameObject.CompareTag("Player"))
-            return;
-
         // Hit monster
         if (collision.gameObject.CompareTag("Monster"))
         {
             MonsterHealth health =
                 collision.gameObject.GetComponent<MonsterHealth>();
 
-            if (health != null)
-            {
-                health.TakeDamage(damage);
-            }
-
             MonsterChase chase =
                 collision.gameObject.GetComponent<MonsterChase>();
 
-            if (chase != null)
+            // Monster only takes damage while stunned
+            if (health != null &&
+                chase != null &&
+                chase.IsStunned())
             {
-                chase.Stun(stunDuration);
+                health.TakeDamage(damage);
+
+                Debug.Log("STUNNED MONSTER HIT!");
             }
+
+            // Projectile still ricochets afterward
         }
 
-        Land();
-    }
+        // Bounce off whatever was hit
+        if (collision.contactCount > 0)
+        {
+            Vector3 incoming =
+                rb.linearVelocity.normalized;
 
-    void Land()
-    {
-        hasLanded = true;
+            Vector3 normal =
+                collision.contacts[0].normal;
 
-        // Stop the fired movement
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
+            Vector3 reflected =
+                Vector3.Reflect(
+                    incoming,
+                    normal
+                );
 
-        // Allow bullet to fall onto the ground
-        rb.useGravity = true;
-    }
-
-    public bool CanBePickedUp()
-    {
-        return hasLanded;
+            rb.linearVelocity =
+                reflected.normalized * speed;
+        }
     }
 }
