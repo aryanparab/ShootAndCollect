@@ -7,6 +7,12 @@ public class PlayerMovement : MonoBehaviour
     public float backwardSpeed = 4f;
     public float turnSpeed = 140f;
 
+    [Header("Arena Boundaries")]
+    public float minX = -14f;
+    public float maxX = 14f;
+    public float minZ = -14f;
+    public float maxZ = 14f;
+
     private Rigidbody rb;
 
     private float moveInput;
@@ -54,10 +60,28 @@ public class PlayerMovement : MonoBehaviour
             currentSpeed *
             Time.fixedDeltaTime;
 
-        rb.MovePosition(
-            rb.position + movement
-        );
+        // Calculate the player's next position
+        Vector3 newPosition =
+            rb.position + movement;
 
+        // Prevent the player from leaving the arena
+        newPosition.x =
+            Mathf.Clamp(
+                newPosition.x,
+                minX,
+                maxX
+            );
+
+        newPosition.z =
+            Mathf.Clamp(
+                newPosition.z,
+                minZ,
+                maxZ
+            );
+
+        rb.MovePosition(newPosition);
+
+        // Rotate player
         float rotationAmount =
             turnInput *
             turnSpeed *

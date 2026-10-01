@@ -88,22 +88,33 @@ public class ProjectilePingPong : MonoBehaviour
         switch (direction)
         {
             case MoveDirection.Right:
-                return Vector3.right;   // +X
+                return Vector3.right;
 
             case MoveDirection.Left:
-                return Vector3.left;    // -X
+                return Vector3.left;
 
             case MoveDirection.Up:
-                return Vector3.forward; // +Z
+                return Vector3.forward;
 
             case MoveDirection.Down:
-                return Vector3.back;    // -Z
+                return Vector3.back;
 
             case MoveDirection.Custom:
                 return customDirection;
 
             default:
                 return Vector3.right;
+        }
+    }
+
+    // NEW: reverse when projectile touches an inner wall
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("BounceWall"))
+        {
+            movingToEnd = !movingToEnd;
+
+            Debug.Log("PROJECTILE HIT INNER WALL - REVERSING");
         }
     }
 }

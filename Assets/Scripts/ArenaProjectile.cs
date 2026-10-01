@@ -123,4 +123,88 @@ public class ArenaProjectile : MonoBehaviour
         rb.linearVelocity =
             moveDirection * speed;
     }
+
+    void OnTriggerEnter(Collider other)
+    {
+        // Only use this for the new inner walls
+        if (!other.CompareTag("BounceWall"))
+            return;
+
+        // Prevent rapid repeated bouncing
+        if (Time.time - lastBounceTime < bounceCooldown)
+            return;
+
+        lastBounceTime = Time.time;
+
+        // Find the closest point on the wall
+        Vector3 closestPoint =
+            other.ClosestPoint(transform.position);
+
+        // Calculate direction away from the wall
+        Vector3 normal =
+            transform.position - closestPoint;
+
+        normal.y = 0f;
+
+        // If Unity cannot determine a good normal,
+        // simply reverse the projectile
+        if (normal.sqrMagnitude < 0.01f)
+        {
+            moveDirection = -moveDirection;
+        }
+        else
+        {
+            normal.Normalize();
+
+            Vector3 reflected =
+                Vector3.Reflect(
+                    moveDirection,
+                    normal
+                );
+
+            reflected.y = 0f;
+
+            moveDirection =
+                reflected.normalized;
+        }
+
+        // Push projectile slightly away from wall
+        transform.position +=
+            moveDirection * 0.15f;
+
+        rb.linearVelocity =
+            moveDirection * speed;
+
+        Debug.Log("BOUNCED OFF INNER WALL");
+    }
+
+    public void BounceFromWall(Transform wall)
+    {
+        Vector3 directionToProjectile =
+            transform.position - wall.position;
+
+        directionToProjectile.y = 0f;
+
+        // Horizontal-looking wall
+        if (Mathf.Abs(wall.localScale.x) >
+            Mathf.Abs(wall.localScale.z))
+        {
+            moveDirection.z *= -1f;
+        }
+        // Vertical-looking wall
+        else
+        {
+            moveDirection.x *= -1f;
+        }
+
+        moveDirection.Normalize();
+
+        transform.position +=
+            moveDirection * 0.2f;
+
+        rb.linearVelocity =
+            moveDirection * speed;
+
+        Debug.Log("BOUNCE!");
+    }
 }
