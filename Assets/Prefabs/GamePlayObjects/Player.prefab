@@ -418,6 +418,10 @@ MonoBehaviour:
   moveSpeed: 10
   backwardSpeed: 10
   turnSpeed: 140
+  minX: -17
+  maxX: 17
+  minZ: -14
+  maxZ: 14
 --- !u!114 &6976923433487291948
 MonoBehaviour:
   m_ObjectHideFlags: 0
